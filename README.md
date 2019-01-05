@@ -46,6 +46,11 @@ find five files:
     introduce the note. See an example here,
     [sparks/1/README.md](sparks/1/README.md)
 
+5. Write your note and generate a DOI using [Zenodo](https://www.zenodo.org/)
+and insert the badge in the README and index.Rmd. See
+[sparks/1/README.md](sparks/1/README.md) and
+[sparks/1/index.Rmd](sparks/1/index.Rmd) for examples.
+
 5. Once you've completed writing your note, either open an
 [Issue](https://github.com/openplantpathology/opp_notes/issues) asking for peer
 or post in the initial
@@ -54,7 +59,8 @@ or post in the initial
 [adamhsparks](https://www.github.com/adamhsparks) will assign reviewers for your
 note.
 
-5. Once your note has been accepted, open a pull request at
+5. Once your note has been accepted, create a new release to update the DOI,
+and open a pull request at
 <https://github.com/openplantpathology/opp_notes/pulls>. We will merge
 your repository into the OPP Notes Repository and update the OPP webpage
 with your new note!
