@@ -50,7 +50,9 @@ find five files:
 [Issue](https://github.com/openplantpathology/opp_notes/issues) asking for peer
 or post in the initial
 [Issue](https://github.com/openplantpathology/opp_notes/issues) from step 1.
-@emdelponte and @adamhsparks will assign reviewers for your note.
+[emdelponte](https://www.github.com/emdelponte) or
+[adamhsparks](https://www.github.com/adamhsparks) will assign reviewers for your
+note.
 
 5. Once your note has been accepted, open a pull request at
 <https://github.com/openplantpathology/opp_notes/pulls>. We will merge
