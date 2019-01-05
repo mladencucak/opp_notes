@@ -44,7 +44,7 @@ find five files:
   
     - [*README.md*](new_contribution/1/README.md) - Update this file to
     introduce the note. See an example here,
-    [sparks/1/Modelling_Nematode_Populations/README.md](sparks/1/Modelling_Nematode_Populations/README.md)
+    [sparks/1/README.md](sparks/1/README.md)
 
 5. Once you've completed writing your note, either open an
 [Issue](https://github.com/openplantpathology/opp_notes/issues) asking for peer
