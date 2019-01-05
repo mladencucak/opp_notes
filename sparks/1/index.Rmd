@@ -15,11 +15,7 @@ csl: phytopathology.csl
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_chunk$set(cache = TRUE)
-```
-
-
-```{r klippy, echo=FALSE, include=TRUE}
+knitr::opts_chunk$set(cache = FALSE)
 klippy::klippy(position = c('bottom', 'left'))   
 ```
  
