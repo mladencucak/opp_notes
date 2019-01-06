@@ -16,6 +16,15 @@ csl: phytopathology.csl
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(cache = TRUE)
+
+# check for klippy and remotes, install as necessary
+if (!require("klippy")) {
+  if (!require("remotes")) {
+  install.packages("remotes", repos = "http://cran.rstudio.com/")
+  }
+  remotes::install_github("RLesur/klippy")
+}
+
 klippy::klippy(position = c('bottom', 'left'))
 ```
 
