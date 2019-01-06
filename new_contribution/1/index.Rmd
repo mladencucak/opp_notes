@@ -1,0 +1,117 @@
+---
+title: "Title Here"
+author:
+- name: Your Name Here
+  affiliation: Your Affiliation Here
+- name: Your Co-Author's Name Here
+  affiliation: Your Co-Author's Affiliation Here
+output:
+  blogdown::html_page:
+    highlight: tango
+    df_print: paged
+bibliography: bibliography.bib
+csl: phytopathology.csl
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
+
+# check for klippy and remotes, install as necessary
+if (!require("klippy")) {
+  if (!require("remotes")) {
+  install.packages("remotes", repos = "http://cran.rstudio.com/")
+  }
+  remotes::install_github("RLesur/klippy")
+}
+
+klippy::klippy(position = c('bottom', 'left'))
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for
+authoring HTML, PDF, and MS Word documents. For more details on using R Markdown
+see <http://rmarkdown.rstudio.com>. This particular template is set to knit to
+HTML output for inclusion in the Open Plant Pathology blog.
+
+When you click the **Knit** button a document will be generated that includes
+both content as well as the output of any embedded R code chunks within the
+document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Spelling
+
+Please ensure that you have made sufficient efforts to ensure that you have used
+proper spelling. Using RStudio, spell check is available in the tool bar, the
+"ABC ✓" button to the right of the "Save" icon.
+
+## Code Formatting
+
+- Inline code can be specified using a single "`" to enclose the code, e.g.,
+`summary(cars)`
+
+- Package names should be bold code, e.g. **`ggplot2`**
+
+- Functions should be referred to using "()" after, e.g. `ggplot()`
+
+- Function parameters should be referred to as in-line code where necessary,
+e.g., `aes`.
+
+- Using RStudio highlight code chunks and use "Code > Reindent Lines" to help
+ensure consistent code indenting.
+
+- Follow a consistent code style when writing code, several are available, pick
+one and follow it through the entire post, here are two if you are unfamiliar:
+  
+  - <http://adv-r.had.co.nz/Style.html>
+  
+  - <https://google.github.io/styleguide/Rguide.xml>
+  
+- Keep line lengths to <80 characters if at all possible to keep readability
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent
+printing of the R code that generated the plot.
+
+## Including Mathematical Equations
+
+Including equations uses LaTeX notation. To include an equation, wrap it in,
+`$$`, *e.g.* `$$y = ax + b$$` would display: $$y = ax + b$$. To display in-line
+use a single `$`, *e.g*, $y$.
+
+Greek symbols are also supported using a "\" followed by the character spelled
+out.
+
+$$y_i \backsim Normal(\mu_i, \sigma)$$
+
+$$\mu_i = \alpha + \beta x_i$$
+
+$$\sigma \backsim Uniform(0, 1)$$
+
+$$\beta \backsim Normal(0, 10)$$
+
+$$\alpha \backsim Normal(0, 10)$$
+
+# Reproducibility
+
+This section will automatically list your R session information.
+
+```{r reproducibility, echo=FALSE}
+devtools::session_info()
+```
+
+# References
+
+Any references found in the [bibliography.bib](bibliography.bib) file will
+automatically be listed in this section.
