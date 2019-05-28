@@ -1,0 +1,84 @@
+---
+title: "Using technilogy to advance the the sience: Digitizing  research results to produce crop disease risk prediction tools"
+author:
+- name: Mladen Cucak
+  affiliation: Maynooth University Department of Geography, Maynooth University, Co. Kildare, Ireland; Teagasc Crops Research Centre, Oak Park, Carlow, Ireland
+- name: Neil McRoberts
+  affiliation: Quantitative Biology and Epidemiology (QBE) lab, Plant Pathology Department at UC Davis
+output:
+  blogdown::html_page:
+    highlight: tango
+    df_print: paged
+bibliography: bibliography.bib
+csl: phytopathology.csl
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
+
+# check for klippy and remotes, install as necessary
+if (!require("klippy")) {
+  if (!require("remotes")) {
+  install.packages("remotes", repos = "http://cran.rstudio.com/")
+  }
+  remotes::install_github("RLesur/klippy")
+}
+
+klippy::klippy(position = c('bottom', 'left'))
+```
+
+# Using 
+
+## Introduction
+
+Text[@ROTEM1971]. 
+
+## Packages
+```{r libraries, message=FALSE}
+list.of.packages <-
+  c(
+    "readxl",
+    "here",
+    "stringr",
+    "reshape2", #Reshaping the data to long format, needed for plotting and model fitting
+    "egg", #Plotting aids: interesting themes and putting together a number of plots
+    "RColorBrewer", #Color palette
+    "mgsub"
+
+  )
+
+new.packages <-
+  list.of.packages[!(list.of.packages %in% installed.packages()[, "Package"])]
+
+#Download packages that are not already present in the library
+if (length(new.packages))
+  install.packages(new.packages)
+
+packages_load <-
+  lapply(list.of.packages, require, character.only = TRUE)
+
+#Print warning if there is a problem with installing/loading some of packages
+if (any(as.numeric(packages_load) == 0)) {
+  warning(paste("Package/s", paste(list.of.packages[packages_load != TRUE]), "not loaded!"))
+} else {
+  print("All packages were successfully loaded.")
+}
+```
+
+# Data
+
+!!!!Check stadnard errors for various infection levels 
+
+```{r}
+dis_df <- read_excel(here::here("cucak", "1", "dat", "P_inf_infection_Rotem.xlsx"))
+head(dis_df)
+```
+
+# Reproducibility
+
+```{r reproducibility, echo=FALSE}
+devtools::session_info()
+```
+
+# References
