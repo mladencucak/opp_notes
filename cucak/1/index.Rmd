@@ -32,7 +32,7 @@ klippy::klippy(position = c('bottom', 'left'))
 
 ## Introduction
 
-Text[@ROTEM1971]. 
+Text[@rotem_relativity_1971].
 
 ## Packages
 ```{r libraries, message=FALSE}
@@ -72,7 +72,81 @@ if (any(as.numeric(packages_load) == 0)) {
 
 ```{r}
 dis_df <- read_excel(here::here("cucak", "1", "dat", "P_inf_infection_Rotem.xlsx"))
+dis_df <-  
+  reshape2::melt(dis_df, id.var = 1:2, variable.name = "temp", value.name = "dis_inc",factorsAsStrings = F)
+dis_df$temp <- as.numeric(as.character.factor(dis_df$temp))
+dis_df$wet_dur_lab <- factor(dis_df$wet_dur)
+levels(dis_df$wet_dur_lab) <- paste0(levels(dis_df$wet_dur_lab), "hr of s. wetness") 
+
+dis_df$inoculum_dose <- factor(dis_df$inoculum_dose, ordered = T)
 head(dis_df)
+```
+
+
+```{r}
+ggplot(dis_df,aes(x= temp, y = dis_inc, group = inoculum_dose, colour = inoculum_dose))+
+geom_point()+
+geom_line()+
+facet_wrap(wet_dur_lab~., ncol = 4)+
+scale_color_brewer(palette="GrandBudapest")+
+labs(
+title = "",
+x = "Temperature (°C)",
+y = "Disease Incidence (grades)",
+color = expression(paste("Inoculum dose ( Sporangia", "/",cm^2,")", sep="")),
+caption = expression(paste(
+"\nFigure 1. The effect of temperature (T, in °C), inoculum dose (Sporangia, in cm) and duration of wet period (W, in hr) on infection of potato leaves by ", "Phytopthora infestans: infection levels obtained for all treatment combinations (averaes of three replicate plants)."
+)))+
+theme_article()+
+theme(legend.position = "top")
+dis_df$wet_dur_lab <- NULL 
+```
+
+
+```{r}
+
+dis_df$temp_lab <- factor(dis_df$temp)
+levels(dis_df$temp_lab) <- paste0(levels(dis_df$temp_lab), "(°C)") 
+
+
+ggplot(dis_df,aes(x= wet_dur, y = dis_inc, group = inoculum_dose, colour = inoculum_dose))+ 
+  geom_point()+
+  geom_line()+
+  facet_wrap(temp_lab~., ncol = 6)+
+  scale_color_brewer(palette="GrandBudapest")+
+  scale_x_discrete(limits= unique(dis_df$wet_dur), labels = as.character(unique(dis_df$wet_dur)))+
+  xlab("Wetness Duration (hours)")+ 
+  ylab("Disease Incidence")+
+  theme_classic()
+```
+
+# fitting the model
+
+```{r}
+dis_df$inoculum_dose <- as.numeric(as.character(dis_df$inoculum_dose))
+
+poly.fit <- lm(dis_inc ~ poly(temp, 
+                              wet_dur, 
+                              inoculum_dose, 
+                              degree = 3), 
+               data = dis_df )
+
+summary(poly.fit)
+anova(poly.fit)
+
+library(ggfortify)
+autoplot(poly.fit, label.size = 2,
+         data = dis_df, 
+         colour = factor(dis_df$temp, ordered = T))+
+  theme_article()
+
+autoplot(poly.fit, which = 1:6, colour = 'dodgerblue3',
+         smooth.colour = 'black', smooth.linetype = 'dashed',
+         ad.colour = 'blue',
+         label.size = 3, label.n = 5, label.colour = 'blue',
+         ncol = 3)
+#Problem scale location
+
 ```
 
 # Reproducibility
