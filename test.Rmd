@@ -1,0 +1,33 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+
+We are trying to model a complex response to 3 interacting explanatory variables.
+The Weibull function might be an appropriate model for the response to leaf wetness duration for two reasons.  First, it has a suitable sigmoid cumulative distribution and second it has a location (or shift) parameter that can be interpreted in biological terms as a minimum requirement for suitable conditions before a process will occur.  The Weibull function has many different parameterizations but one that is relevant for this problem is:$$
+f(d) =\frac{\beta}{\eta} \left(\frac{t-\gamma}{\eta}\right)^{\beta-1} e^{\left(\frac{t-\gamma}{\eta}\right)^{\beta}} $$ 
+
+Where $f(d)$ is the wetness-duration-dependent infection function, $\beta$ is the Weibull rate parameter, $\eta$ is the scale parameter (setting the characteristic duration over which events are completed), and $\gamma$ is the location parameter.
+
+We choose a value (for function) for $\gamma$ that replicates what is know about the biology of the process.  This leaves the issue of the remaining parameters $\beta$ and $\eta$.   In essence, we construct functions for the response of these parameters to temperature and inoculum density, either from first principles, from data fitting, or a hybrid process.  Then we plug the derived functions into the formula for the Weibull function, which becomes a translation device for turning input data for temperature, inoculum level and wetness duration into values for infection intensity.
+
+Writing generic functional forms for the functions for $\beta$ and $\eta$ as $\beta\equiv h(T,I)$ and $\eta\equiv l(T,I)$, where $T$ and $I$ are temperature and inoculum level, respectively, we obtain:$$
+f(d) =\frac{h(T,I)}{l(T,I)} \left(\frac{t-\gamma}{l(T,I)}\right)^{h(T,I)-1} e^{\left(\frac{t-\gamma}{l(T,I)}\right)^{h(T,I)}} $$ 
+
+
+Written with [StackEdit https://stackedit.io/).

@@ -79,8 +79,8 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <pre class="sourceCode r"><code class="sourceCode r">list.of.packages &lt;-
 <span class="st">  </span><span class="kw">c</span>(
     <span class="st">&quot;readxl&quot;</span>,
-    <span class="st">&quot;here&quot;</span>,
-    <span class="st">&quot;stringr&quot;</span>,
+    <span class="st">&quot;here&quot;</span>, <span class="co">#package that helps paths in different platforms</span>
+    <span class="st">&quot;stringr&quot;</span>, <span class="co">#string manipulations</span>
     <span class="st">&quot;reshape2&quot;</span>, <span class="co">#Reshaping the data to long format, needed for plotting and model fitting</span>
     <span class="st">&quot;egg&quot;</span>, <span class="co">#Plotting aids: interesting themes and putting together a number of plots</span>
     <span class="st">&quot;RColorBrewer&quot;</span>, <span class="co">#Color palette</span>
@@ -115,13 +115,13 @@ dis_df &lt;-<span class="st">  </span>
 <span class="st">  </span>reshape2<span class="op">::</span><span class="kw">melt</span>(dis_df, <span class="dt">id.var =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>, <span class="dt">variable.name =</span> <span class="st">&quot;temp&quot;</span>, <span class="dt">value.name =</span> <span class="st">&quot;dis_inc&quot;</span>,<span class="dt">factorsAsStrings =</span> F)
 dis_df<span class="op">$</span>temp &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(<span class="kw">as.character.factor</span>(dis_df<span class="op">$</span>temp))
 dis_df<span class="op">$</span>wet_dur_lab &lt;-<span class="st"> </span><span class="kw">factor</span>(dis_df<span class="op">$</span>wet_dur)
-<span class="kw">levels</span>(dis_df<span class="op">$</span>wet_dur_lab) &lt;-<span class="st"> </span><span class="kw">paste0</span>(<span class="kw">levels</span>(dis_df<span class="op">$</span>wet_dur_lab), <span class="st">&quot;hr of s. wetness&quot;</span>) 
+<span class="kw">levels</span>(dis_df<span class="op">$</span>wet_dur_lab) &lt;-<span class="st"> </span><span class="kw">paste0</span>(<span class="kw">levels</span>(dis_df<span class="op">$</span>wet_dur_lab), <span class="st">&quot;h of s. wetness&quot;</span>) 
 
 dis_df<span class="op">$</span>inoculum_dose &lt;-<span class="st"> </span><span class="kw">factor</span>(dis_df<span class="op">$</span>inoculum_dose, <span class="dt">ordered =</span> T)
 <span class="kw">head</span>(dis_df)</code></pre>
 <div data-pagedtable="false">
 <script data-pagedtable-source type="application/json">
-{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["inoculum_dose"],"name":[1],"type":["ord"],"align":["right"]},{"label":["wet_dur"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["temp"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["dis_inc"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["wet_dur_lab"],"name":[5],"type":["fctr"],"align":["left"]}],"data":[{"1":"15","2":"3","3":"5","4":"0","5":"3hr of s. wetness","_rn_":"1"},{"1":"45","2":"3","3":"5","4":"0","5":"3hr of s. wetness","_rn_":"2"},{"1":"135","2":"3","3":"5","4":"0","5":"3hr of s. wetness","_rn_":"3"},{"1":"400","2":"3","3":"5","4":"0","5":"3hr of s. wetness","_rn_":"4"},{"1":"1200","2":"3","3":"5","4":"0","5":"3hr of s. wetness","_rn_":"5"},{"1":"15","2":"6","3":"5","4":"0","5":"6hr of s. wetness","_rn_":"6"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["inoculum_dose"],"name":[1],"type":["ord"],"align":["right"]},{"label":["wet_dur"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["temp"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["dis_inc"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["wet_dur_lab"],"name":[5],"type":["fctr"],"align":["left"]}],"data":[{"1":"15","2":"3","3":"5","4":"0","5":"3h of s. wetness","_rn_":"1"},{"1":"45","2":"3","3":"5","4":"0","5":"3h of s. wetness","_rn_":"2"},{"1":"135","2":"3","3":"5","4":"0","5":"3h of s. wetness","_rn_":"3"},{"1":"400","2":"3","3":"5","4":"0","5":"3h of s. wetness","_rn_":"4"},{"1":"1200","2":"3","3":"5","4":"0","5":"3h of s. wetness","_rn_":"5"},{"1":"15","2":"6","3":"5","4":"0","5":"6h of s. wetness","_rn_":"6"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggplot</span>(dis_df,<span class="kw">aes</span>(<span class="dt">x=</span> temp, <span class="dt">y =</span> dis_inc, <span class="dt">group =</span> inoculum_dose, <span class="dt">colour =</span> inoculum_dose))<span class="op">+</span>
@@ -157,6 +157,13 @@ dis_df<span class="op">$</span>inoculum_dose &lt;-<span class="st"> </span><span
 <span class="st">  </span><span class="kw">theme_classic</span>()</code></pre>
 <pre><code>## Warning in pal_name(palette, type): Unknown palette GrandBudapest</code></pre>
 <p><img src="index_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>We are trying to model a complex response to 3 interacting explanatory variables.
+The Weibull function might be an appropriate model for the response to leaf wetness duration for two reasons. First, it has a suitable sigmoid cumulative distribution and second it has a location (or shift) parameter that can be interpreted in biological terms as a minimum requirement for suitable conditions before a process will occur. The Weibull function has many different parameterizations but one that is relevant for this problem is:<span class="math display">\[
+f(d) =\frac{\beta}{\eta} \left(\frac{t-\gamma}{\eta}\right)^{\beta-1} e^{\left(\frac{t-\gamma}{\eta}\right)^{\beta}} \]</span></p>
+<p>Where <span class="math inline">\(f(d)\)</span> is the wetness-duration-dependent infection function, <span class="math inline">\(\beta\)</span> is the Weibull rate parameter, <span class="math inline">\(\eta\)</span> is the scale parameter (setting the characteristic duration over which events are completed), and <span class="math inline">\(\gamma\)</span> is the location parameter.</p>
+<p>We choose a value (for function) for <span class="math inline">\(\gamma\)</span> that replicates what is know about the biology of the process. This leaves the issue of the remaining parameters <span class="math inline">\(\beta\)</span> and <span class="math inline">\(\eta\)</span>. In essence, we construct functions for the response of these parameters to temperature and inoculum density, either from first principles, from data fitting, or a hybrid process. Then we plug the derived functions into the formula for the Weibull function, which becomes a translation device for turning input data for temperature, inoculum level and wetness duration into values for infection intensity.</p>
+<p>Writing generic functional forms for the functions for <span class="math inline">\(\beta\)</span> and <span class="math inline">\(\eta\)</span> as <span class="math inline">\(\beta\equiv h(T,I)\)</span> and <span class="math inline">\(\eta\equiv l(T,I)\)</span>, where <span class="math inline">\(T\)</span> and <span class="math inline">\(I\)</span> are temperature and inoculum level, respectively, we obtain:<span class="math display">\[
+f(d) =\frac{h(T,I)}{l(T,I)} \left(\frac{t-\gamma}{l(T,I)}\right)^{h(T,I)-1} e^{\left(\frac{t-\gamma}{l(T,I)}\right)^{h(T,I)}} \]</span></p>
 </div>
 <div id="fitting-the-model" class="section level1">
 <h1>fitting the model</h1>
