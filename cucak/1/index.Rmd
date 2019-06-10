@@ -1,12 +1,12 @@
 ---
-title: "Using technilogy to advance the the sience: Digitizing  research results to produce crop disease risk prediction tools"
+title: "Using technology to advance the the science: Digitizing  research results to produce crop disease risk prediction tools"
 author:
 - name: Mladen Cucak
   affiliation: Maynooth University Department of Geography, Maynooth University, Co. Kildare, Ireland; Teagasc Crops Research Centre, Oak Park, Carlow, Ireland
 - name: Neil McRoberts
   affiliation: Quantitative Biology and Epidemiology (QBE) lab, Plant Pathology Department at UC Davis
 output:
-  blogdown::html_page:
+  html_document:
     highlight: tango
     df_print: paged
 bibliography: bibliography.bib
@@ -28,12 +28,33 @@ if (!require("klippy")) {
 klippy::klippy(position = c('bottom', 'left'))
 ```
 
-# Using 
+# Background
 
-## Introduction
+The epidemics development of potato late blight, a most important potato crop disease caused by oomycete  *Phytopthora infestans*, depends on availability and the race of pathogen and host and most importantly - suitability of the environment. Potato varieties grown are mostly susceptible to potato late blight due to tradition and market demandd. The pathogen is becoming more agressive due to increased diversification of its population since the 1970's. Because of this, the use of pesticides is becoming increasingly prophylactic and and spray intervals are decreasing to as low as 3-4 days, leading to over 20 applications for a season in some places. Reliable tools build on scientific knowledge of the epidemiology of the disease are necessary now more than ever. The weather network and weather forecasting models are improving over time and today we are far away from where we were 10,20 years ago. Increasing availability of computing power allows researchers all over the world to develop plant disease prediction models, test, share and improve them.  
+Unfortunately, this is not the current situation. A challenging need for and interdisciplinary approach is often a limiting factor for success of projects aiming to develop useful tools. There is a number of factors limiting the value of the models. The disease prediction models are often parochial in nature, limited to the environments where they were developed. Issues: User friendliness of the systems. 
 
-Text[@rotem_relativity_1971].
+## Potential solutions
+Reproducibility, common tools, open approach.  
+We are proposing a method to partially overcome the above-mentioned issue of interdiscipinarity. R is an open source statistical programing language and one of most used data science tools.
 
+
+# A case study 
+The methods in the study we have analysed here is easily replicated to a number of plant - pathogen systems. Duthie and Magarey have proposed simple infection models, but a great obstacle is usually the mathematical understanding and programatic implementation of the study analysis part. 
+The Weibull function might be an appropriate model for the response to leaf wetness duration for two reasons.  First, it has a suitable sigmoid cumulative distribution and second it has a location (or shift) parameter that can be interpreted in biological terms as a minimum requirement for suitable conditions before a process will occur.  The Weibull function has many different parameterizations but one that is relevant for this problem is:$$
+f(d) =\frac{\beta}{\eta} \left(\frac{t-\gamma}{\eta}\right)^{\beta-1} e^{\left(\frac{t-\gamma}{\eta}\right)^{\beta}} $$ 
+
+Where $f(d)$ is the wetness-duration-dependent infection function, $\beta$ is the Weibull rate parameter, $\eta$ is the scale parameter (setting the characteristic duration over which events are completed), and $\gamma$ is the location parameter.
+
+We choose a value (for function) for $\gamma$ that replicates what is know about the biology of the process.  This leaves the issue of the remaining parameters $\beta$ and $\eta$.   In essence, we construct functions for the response of these parameters to temperature and inoculum density, either from first principles, from data fitting, or a hybrid process.  Then we plug the derived functions into the formula for the Weibull function, which becomes a translation device for turning input data for temperature, inoculum level and wetness duration into values for infection intensity.
+
+Writing generic functional forms for the functions for $\beta$ and $\eta$ as $\beta\equiv h(T,I)$ and $\eta\equiv l(T,I)$, where $T$ and $I$ are temperature and inoculum level, respectively, we obtain:$$
+f(d) =\frac{h(T,I)}{l(T,I)} \left(\frac{t-\gamma}{l(T,I)}\right)^{h(T,I)-1} e^{\left(\frac{t-\gamma}{l(T,I)}\right)^{h(T,I)}} $$ 
+
+# The use of the available knowledge 
+Rotem[-@rotem_relativity_1971] investigated the levels of infection caused by 120 different level combinaitions of the environmental variables in a factorial experiment. 
+The original paper is freely available from [Phytopathology](https://www.apsnet.org/publications/phytopathology/backissues/Documents/1971Articles/Phyto61n03_275.pdf)
+
+# The implementation
 ## Packages
 ```{r libraries, message=FALSE}
 list.of.packages <-
@@ -69,21 +90,26 @@ if (any(as.numeric(packages_load) == 0)) {
 # Data
 
 !!!!Check stadnard errors for various infection levels 
-
+The data is imported and converted to long format. 
 ```{r}
 dis_df <- read_excel(here::here("cucak", "1", "dat", "P_inf_infection_Rotem.xlsx"))
 dis_df <-  
   reshape2::melt(dis_df, id.var = 1:2, variable.name = "temp", value.name = "dis_inc",factorsAsStrings = F)
 dis_df$temp <- as.numeric(as.character.factor(dis_df$temp))
-dis_df$wet_dur_lab <- factor(dis_df$wet_dur)
-levels(dis_df$wet_dur_lab) <- paste0(levels(dis_df$wet_dur_lab), "h of s. wetness") 
 
-dis_df$inoculum_dose <- factor(dis_df$inoculum_dose, ordered = T)
+# dis_df$inoculum_dose <- factor(dis_df$inoculum_dose, ordered = T)
 head(dis_df)
 ```
 
+## Initial exploration
+Figure 2. depicting the results of the study is reproduced. 
 
 ```{r}
+
+dis_df$wet_dur_lab <- factor(dis_df$wet_dur)
+levels(dis_df$wet_dur_lab) <- paste0(levels(dis_df$wet_dur_lab), "h of s. wetness") 
+
+
 ggplot(dis_df,aes(x= temp, y = dis_inc, group = inoculum_dose, colour = inoculum_dose))+
 geom_point()+
 geom_line()+
@@ -95,7 +121,7 @@ x = "Temperature (°C)",
 y = "Disease Incidence (grades)",
 color = expression(paste("Inoculum dose ( Sporangia", "/",cm^2,")", sep="")),
 caption = expression(paste(
-"\nFigure 1. The effect of temperature (T, in °C), inoculum dose (Sporangia, in cm) and duration of wet period (W, in hr) on infection of potato leaves by ", "Phytopthora infestans: infection levels obtained for all treatment combinations (averaes of three replicate plants)."
+"\nFigure 1. The effect of temperature (T, in °C), inoculum dose (Sporangia, in cm) and duration of wet period (W, in hr) on infection of potato leaves by ", "Phytopthora Infestans: infection levels obtained for all treatment combinations (averages of three replicate plants)."
 )))+
 theme_article()+
 theme(legend.position = "top")
@@ -109,32 +135,55 @@ dis_df$temp_lab <- factor(dis_df$temp)
 levels(dis_df$temp_lab) <- paste0(levels(dis_df$temp_lab), "(°C)") 
 
 
-ggplot(dis_df,aes(x= wet_dur, y = dis_inc, group = inoculum_dose, colour = inoculum_dose))+ 
+ggplot(dis_df,aes(x= wet_dur, y = dis_inc, group = factor(inoculum_dose), colour = factor(inoculum_dose)))+ 
   geom_point()+
   geom_line()+
-  facet_wrap(temp_lab~., ncol = 6)+
-  scale_color_brewer(palette="GrandBudapest")+
+   facet_wrap(temp_lab~., ncol = 6)+
+scale_color_brewer(palette="GrandBudapest")+
   scale_x_discrete(limits= unique(dis_df$wet_dur), labels = as.character(unique(dis_df$wet_dur)))+
   xlab("Wetness Duration (hours)")+ 
   ylab("Disease Incidence")+
   theme_classic()
 ```
 
+```{r plot_all_raw}
+ggplot(dis_df,aes(x= wet_dur, y = dis_inc, group = inoculum_dose, colour = inoculum_dose))+ 
+  geom_point()+
+  geom_line()+
+  facet_grid(inoculum_dose~ temp_lab)+
+  scale_color_brewer(palette="GrandBudapest")+
+  scale_x_discrete(limits= unique(dis_df$wet_dur), labels = as.character(unique(dis_df$wet_dur)))+
+  xlab("Wetness Duration (hours)")+ 
+  ylab("Disease Incidence")+
+  theme_article()
+dis_df$temp_lab <- NULL
+```
 
 We are trying to model a complex response to 3 interacting explanatory variables.
-The Weibull function might be an appropriate model for the response to leaf wetness duration for two reasons.  First, it has a suitable sigmoid cumulative distribution and second it has a location (or shift) parameter that can be interpreted in biological terms as a minimum requirement for suitable conditions before a process will occur.  The Weibull function has many different parameterizations but one that is relevant for this problem is:$$
-f(d) =\frac{\beta}{\eta} \left(\frac{t-\gamma}{\eta}\right)^{\beta-1} e^{\left(\frac{t-\gamma}{\eta}\right)^{\beta}} $$ 
-
-Where $f(d)$ is the wetness-duration-dependent infection function, $\beta$ is the Weibull rate parameter, $\eta$ is the scale parameter (setting the characteristic duration over which events are completed), and $\gamma$ is the location parameter.
-
-We choose a value (for function) for $\gamma$ that replicates what is know about the biology of the process.  This leaves the issue of the remaining parameters $\beta$ and $\eta$.   In essence, we construct functions for the response of these parameters to temperature and inoculum density, either from first principles, from data fitting, or a hybrid process.  Then we plug the derived functions into the formula for the Weibull function, which becomes a translation device for turning input data for temperature, inoculum level and wetness duration into values for infection intensity.
-
-Writing generic functional forms for the functions for $\beta$ and $\eta$ as $\beta\equiv h(T,I)$ and $\eta\equiv l(T,I)$, where $T$ and $I$ are temperature and inoculum level, respectively, we obtain:$$
-f(d) =\frac{h(T,I)}{l(T,I)} \left(\frac{t-\gamma}{l(T,I)}\right)^{h(T,I)-1} e^{\left(\frac{t-\gamma}{l(T,I)}\right)^{h(T,I)}} $$ 
 
 
+## Model fitting
 
-# fitting the model
+```{r}
+temp <- dis_df$temp
+inoculum_dose <- dis_df$inoculum_dose
+wet_dur <-  dis_df$wet_dur
+
+#the negative log-likelihood function
+LL <- function(){
+  beta <- temp * inoculum_dose
+  eta  <- temp * inoculum_dose
+  fd <- (beta/eta) *((wet_dur - 3)/ eta)**(beta-1)**((wet_dur-3)/eta)**beta
+}
+
+unique(dis_df$inoculum_dose)
+# (mll2 <- mle2(LL,data=dis_df[dis_df$inoculum_dose==400,],
+#               start=list()))
+cc <- coef(mll2)
+```
+
+
+### The polynomial model
 
 ```{r}
 dis_df$inoculum_dose <- as.numeric(as.character(dis_df$inoculum_dose))
@@ -162,6 +211,35 @@ autoplot(poly.fit, which = 1:6, colour = 'dodgerblue3',
 #Problem scale location
 
 ```
+The problem with the polynomial fit. 
+```{r}
+dis_df$temp <- as.numeric(as.character(dis_df$temp))
+
+df_fit <- cbind(dis_df, predict(poly.fit,dis_df, interval = 'confidence'))
+dis_df <-  
+  reshape2::melt(dis_df, id.var = 1:2, variable.name = "temp", value.name = "dis_inc",factorsAsStrings = F)
+
+ggplot(data = df_fit,aes(x= wet_dur, y = dis_inc, colour = "Observed"))+
+  geom_point()+
+  geom_line()+
+  geom_line(aes(wet_dur, fit, colour = "Predicted")) +
+  geom_ribbon(aes(ymin=lwr,ymax=upr), alpha=0.3)+
+  scale_color_manual(values = c( 
+    Observed = "black", 
+    Predicted = "red"))+
+  facet_grid(inoculum_dose~temp)
+
+
+ggplot(data = df_fit,aes(x= temp, y = dis_inc, colour = "Observed"))+
+  geom_point()+
+  geom_line()+
+  geom_line(aes(wet_dur, fit, colour = "Predicted")) +
+  geom_ribbon(aes(ymin=lwr,ymax=upr), alpha=0.3)+
+  scale_color_manual(values = c( Observed = "black", Predicted = "red"))+
+  facet_grid(inoculum_dose~wet_dur, scales = "free")
+```
+!The problem is that it does not follow the biological nature of the process. 
+
 
 # Reproducibility
 
