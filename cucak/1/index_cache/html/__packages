@@ -10,3 +10,10 @@ egg
 RColorBrewer
 mgsub
 ggfortify
+bbmle
+optimx
+gamlss.data
+MASS
+gamlss.dist
+nlme
+gamlss

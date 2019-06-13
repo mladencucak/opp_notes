@@ -3,6 +3,8 @@ title: "Using technology to advance the the science: Digitizing  research result
 author:
 - name: Mladen Cucak
   affiliation: Maynooth University Department of Geography, Maynooth University, Co. Kildare, Ireland; Teagasc Crops Research Centre, Oak Park, Carlow, Ireland
+- name: Rafael De Andrade Moral
+  affiliation: Maynooth University Department of Mathematics and Statistics, Maynooth University, Co. Kildare, Ireland
 - name: Neil McRoberts
   affiliation: Quantitative Biology and Epidemiology (QBE) lab, Plant Pathology Department at UC Davis
 output:
@@ -65,7 +67,8 @@ list.of.packages <-
     "reshape2", #Reshaping the data to long format, needed for plotting and model fitting
     "egg", #Plotting aids: interesting themes and putting together a number of plots
     "RColorBrewer", #Color palette
-    "mgsub"
+    "mgsub",
+    "splines"
 
   )
 
@@ -105,16 +108,15 @@ head(dis_df)
 Figure 2. depicting the results of the study is reproduced. 
 
 ```{r}
-
 dis_df$wet_dur_lab <- factor(dis_df$wet_dur)
 levels(dis_df$wet_dur_lab) <- paste0(levels(dis_df$wet_dur_lab), "h of s. wetness") 
 
 
-ggplot(dis_df,aes(x= temp, y = dis_inc, group = inoculum_dose, colour = inoculum_dose))+
+ggplot(dis_df,aes(x= temp, y = dis_inc, group = factor(inoculum_dose), colour = factor(inoculum_dose)))+
 geom_point()+
 geom_line()+
 facet_wrap(wet_dur_lab~., ncol = 4)+
-scale_color_brewer(palette="GrandBudapest")+
+ scale_color_brewer(palette="GrandBudapest")+
 labs(
 title = "",
 x = "Temperature (°C)",
@@ -138,23 +140,33 @@ levels(dis_df$temp_lab) <- paste0(levels(dis_df$temp_lab), "(°C)")
 ggplot(dis_df,aes(x= wet_dur, y = dis_inc, group = factor(inoculum_dose), colour = factor(inoculum_dose)))+ 
   geom_point()+
   geom_line()+
-   facet_wrap(temp_lab~., ncol = 6)+
-scale_color_brewer(palette="GrandBudapest")+
+  facet_wrap(temp_lab~., ncol = 6)+
+  scale_color_brewer(palette="GrandBudapest")+
   scale_x_discrete(limits= unique(dis_df$wet_dur), labels = as.character(unique(dis_df$wet_dur)))+
   xlab("Wetness Duration (hours)")+ 
   ylab("Disease Incidence")+
+  labs(
+  title = "", 
+  color = expression(paste("Inoculum dose ( Sporangia", "/",cm^2,")", sep="")))+
+  theme(legend.position = "top")+
   theme_classic()
 ```
 
 ```{r plot_all_raw}
-ggplot(dis_df,aes(x= wet_dur, y = dis_inc, group = inoculum_dose, colour = inoculum_dose))+ 
+ggplot(dis_df,aes(x= wet_dur, y = dis_inc, group = factor(inoculum_dose), colour = factor(inoculum_dose)))+ 
   geom_point()+
   geom_line()+
   facet_grid(inoculum_dose~ temp_lab)+
   scale_color_brewer(palette="GrandBudapest")+
   scale_x_discrete(limits= unique(dis_df$wet_dur), labels = as.character(unique(dis_df$wet_dur)))+
-  xlab("Wetness Duration (hours)")+ 
-  ylab("Disease Incidence")+
+  labs(
+    title = "",
+    x = "Temperature (°C)&Wetness Duration (hours)",
+    y = "Disease Incidence (grades 1-5)& Inoc. Dose",
+    color = expression(paste(
+      "Inoculum dose \n( Sporangia", "/", cm ^ 2, ")", sep = ""
+    )))+
+  theme(legend.position = "top")+
   theme_article()
 dis_df$temp_lab <- NULL
 ```
@@ -164,25 +176,134 @@ We are trying to model a complex response to 3 interacting explanatory variables
 
 ## Model fitting
 
+Plotting important for assessing model fit. One can tell which model one fit does the best job describing the data by plotting the fitted values in various ways. One easy application is graphing the residuals of a model. If one imagine a model as a best-fit line going through the scatterplot of the data, the residuals are the distances of of the points in the scatterplot from the best-fit line. If the model fits, then the plot of residuals against the fitted values should be scattered randomly. If the scatter is not random that means there's some other effect in the data that you're missing.
+
+
+
 ```{r}
-temp <- dis_df$temp
-inoculum_dose <- dis_df$inoculum_dose
-wet_dur <-  dis_df$wet_dur
-
-#the negative log-likelihood function
-LL <- function(){
-  beta <- temp * inoculum_dose
-  eta  <- temp * inoculum_dose
-  fd <- (beta/eta) *((wet_dur - 3)/ eta)**(beta-1)**((wet_dur-3)/eta)**beta
-}
-
-unique(dis_df$inoculum_dose)
-# (mll2 <- mle2(LL,data=dis_df[dis_df$inoculum_dose==400,],
-#               start=list()))
-cc <- coef(mll2)
+# library("optimx")
+fit <- bbmle::mle2(dis_inc ~ dnorm(mean = beta/eta * ((wet_dur - 3)/eta)^(beta - 1) *exp(((wet_dur - 3)/eta)^beta),
+                            sd = sigma),
+            parameters = list(beta ~ temp * inoculum_dose,
+                              eta ~ temp * inoculum_dose),
+            start = list(beta = .001, eta = 1, sigma = 1), ## you have to be very careful about starting values
+            optimizer = "nlm", ## you can also play with different optimizers; or use contrained optimization or a reparameterization (e.g. for eta > 0)
+            data = dis_df)
 ```
 
+### splines 
+```{r}
+knt <- 2
+deg <- 3
+fit_splines <- lm(dis_inc ~ bs(temp, degree = deg, knots =knt ) *
+                            bs(wet_dur, degree = deg, knots = knt) *
+                            bs(inoculum_dose, degree = deg, knots = knt), data = dis_df)
+```
 
+```{r}
+df_fit <- cbind(dis_df, predict(fit_splines,dis_df, interval = 'confidence'))
+
+ggplot(data = df_fit,aes(x= wet_dur, y = dis_inc, colour = "Observed"))+
+  geom_point()+
+  geom_line()+
+  geom_line(aes(wet_dur, fit, colour = "Predicted")) +
+  geom_ribbon(aes(ymin=lwr,ymax=upr), alpha=0.3)+
+  scale_color_manual(values = c( 
+    Observed = "black", 
+    Predicted = "red"))+
+  facet_grid(inoculum_dose~temp)
+
+
+ggplot(data = df_fit,aes(x= temp, y = dis_inc, colour = "Observed"))+
+  geom_point()+
+  geom_line()+
+  geom_line(aes(temp, fit, colour = "Predicted")) +
+  geom_ribbon(aes(ymin=lwr,ymax=upr), alpha=0.3)+
+  scale_color_manual(values = c( Observed = "black", Predicted = "red"))+
+  facet_grid(inoculum_dose~wet_dur, scales = "free")
+```
+
+### gamlss
+Another issue is that your response is a grading scale, from 0 to 5, and therefore bounded. Hence the normal model might be innapropriate. Curiously when you do the polynomial fit the residuals look normal and assumptions seem met, even though predictions are poor. With the splines model, assumptions seem to be violated, however predictions are ok. This is something to do with the nature of the response, which is not normal, but bounded. Maybe one way of looking at this is by transforming the scale 0-5 to 0-1, and use beta regression for continuous proportions. Here is code that does that  
+ GAMLSS were introduced by Rigby & Stasinopoulos (2001, 2005)
+and Akantziliotou et al. (2002) as a way of overcoming some of the
+limitations associated with Generalized Linear Models (GLM) and
+Generalized Additive Models (GAM) (Nelder & Wedderburn, 1972
+and Hastie & Tibshirani, 1990, respectively)
+
+```{r}
+dis_df$dis_inc2 <- dis_df$dis_inc/5
+dis_df$dis_inc2[dis_df$dis_inc2 == 1] <- .999
+dis_df$dis_inc2[dis_df$dis_inc2 == 0] <- .001
+
+ 
+fit <- gamlss::gamlss(dis_inc2 ~ temp * wet_dur * inoculum_dose,
+                   family = "BE",
+                   data = dis_df)
+
+gamlss::wp(fit)
+
+gamlss::wp(fit, xvar = ~ wet_dur * inoculum_dose)
+```
+The wormplots show that the model fit is satisfactory, but I haven't looked at the predictions.
+```{r}
+df_fit <- cbind(dis_df, fit = gamlss:: predictAll(fit,newdata = dis_df, se.fit = TRUE))
+
+ggplot(data = df_fit,aes(x= wet_dur, y = dis_inc2, colour = "Observed"))+
+  geom_point()+
+  geom_line()+
+  geom_line(aes(wet_dur, fit.y, colour = "Predicted")) +
+  # geom_ribbon(aes(ymin=lwr,ymax=upr), alpha=0.3)+
+  scale_color_manual(values = c( 
+    Observed = "black", 
+    Predicted = "red"))+
+  facet_grid(inoculum_dose~temp)
+
+
+ggplot(data = df_fit,aes(x= temp, y = dis_inc2, colour = "Observed"))+
+  geom_point()+
+  geom_line()+
+  geom_line(aes(wet_dur, fit.y, colour = "Predicted")) +
+  # geom_ribbon(aes(ymin=lwr,ymax=upr), alpha=0.3)+
+  scale_color_manual(values = c( Observed = "black", Predicted = "red"))+
+  facet_grid(inoculum_dose~wet_dur, scales = "free")
+```
+
+You can also include polynomials in there, as well as model the scale with covariates, by using
+
+ 
+```{r}
+fit2 <- gamlss(dis_inc2 ~ temp * wet_dur * inoculum_dose,
+                   sigma.formula = ~ temp * wet_dur * inoculum_dose,
+                   family = BE,
+                   data = dis_df)
+```                 
+  
+Am I not getting something here, this seems like it is just connecting the dots? This is clasic overfitting then? 
+```{r}
+
+df_fit <- cbind(dis_df, fit = gamlss:: predictAll(fit2,newdata = dis_df, se.fit = TRUE))
+
+ggplot(data = df_fit,aes(x= wet_dur, y = dis_inc2, colour = "Observed"))+
+  geom_point()+
+  geom_line()+
+  geom_line(aes(wet_dur, fit.y, colour = "Predicted")) +
+  # geom_ribbon(aes(ymin=lwr,ymax=upr), alpha=0.3)+
+  scale_color_manual(values = c( 
+    Observed = "black", 
+    Predicted = "red"))+
+  facet_grid(inoculum_dose~temp)
+
+
+ggplot(data = df_fit,aes(x= temp, y = dis_inc2, colour = "Observed"))+
+  geom_point()+
+  geom_line()+
+  geom_line(aes(temp, fit.y, colour = "Predicted")) +
+  # geom_ribbon(aes(ymin=lwr,ymax=upr), alpha=0.3)+
+  scale_color_manual(values = c( Observed = "black", Predicted = "red"))+
+  facet_grid(inoculum_dose~wet_dur, scales = "free")
+```
+                   
 ### The polynomial model
 
 ```{r}
